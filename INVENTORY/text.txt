@@ -1,0 +1,86 @@
+
+F:/LHFIM/INVENTORY/firebase_config.json
+--------------------------------------------------
+USEFULL EXAMPLES
+import flet as ft
+
+def main(page: ft.Page):
+    page.window.width = 600
+    page.window.height = 400
+    t = ft.Text(
+        value="Hello, world!",
+        color="green",
+        size=50,
+        text_align=ft.TextAlign.CENTER,
+        font_family="Arial",  # System font
+        style=ft.TextStyle(weight=ft.FontWeight.BOLD)
+    )
+   **** page.add(
+        ft.Container(
+            content=t,
+            alignment=ft.alignment.center,
+            expand=True
+        )
+    )
+    page.update()*****
+
+ft.app(main)
+------------------------------------------------------------
+ rows = [
+            ft.DataRow(cells=[
+                ft.DataCell(ft.Text(f"Buyer {i}")),
+                ft.DataCell(ft.Text(f"buyer{i}@email.com")),
+                ft.DataCell(ft.IconButton(
+                    icon=ft.Icons.CLOSE,
+                    icon_color="red",
+                    tooltip="Remove Buyer",
+                    on_click=lambda e, row=i-1: self.remove_buyer_row(row)
+                ))
+            ]) for i in range(1, 50)  # 50 rows to ensure scrolling
+        ]
+        self.buyer_rows = rows  # Store rows for removal
+        main_content = ft.Container(
+            content=ft.Column([
+                ft.Text("Buyers Scene", size=20, weight=ft.FontWeight.BOLD),
+                ft.Icon(name=ft.Icons.CLOSE, color="red", size=30, tooltip="Close Scene"),
+                ft.ListView(
+                    controls=[
+                        ft.DataTable(
+                            columns=[
+                                ft.DataColumn(ft.Text("Name")),
+                                ft.DataColumn(ft.Text("Contact")),
+                                ft.DataColumn(ft.Text("Action"))
+                            ],
+                            rows=rows
+                        )
+                    ],
+                    height=400,  # Fixed height to trigger scrollbars
+                    expand=True,
+                    auto_scroll=False
+                )
+            ], scroll=ft.ScrollMode.AUTO),
+            expand=True,
+            padding=20
+---------------------------------------------------------------------
+ft.ListView(
+    controls=[
+        ft.Row(
+            controls=[
+                ft.DataTable(
+                    columns=[
+                        ft.DataColumn(ft.Text("Name")),
+                        ft.DataColumn(ft.Text("Contact")),
+                        ft.DataColumn(ft.Text("Action")),
+                        # Add more columns
+                        ft.DataColumn(ft.Text("Extra 1")),
+                        ft.DataColumn(ft.Text("Extra 2"))
+                    ],
+                    rows=rows
+                )
+            ],
+            scroll=ft.ScrollMode.AUTO
+        )
+    ],
+    height=400,
+    expand=True
+)
