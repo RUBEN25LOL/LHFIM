@@ -26,12 +26,16 @@ def main(page: ft.Page):
         else:
             page.snack_bar = ft.SnackBar(ft.Text("Please enter a commit message!"))
             page.snack_bar.open = True
+        textfield.value=""
         page.update()
     
-    button = ft.IconButton(
+    text1=ft.Text("",weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER)
+
+
+    button1= ft.IconButton(
         icon=ft.icons.CHECK_CIRCLE,
         icon_size=40,
-        on_click=commit_changes,
+        on_click=lambda e :(setattr(text1,"value","text"),commit_changes(None)),
         tooltip="Commit changes"
     )
     
@@ -41,7 +45,8 @@ def main(page: ft.Page):
             [
                 text,
                 ft.Row([textfield], alignment=ft.MainAxisAlignment.CENTER),
-                ft.Row([button], alignment=ft.MainAxisAlignment.CENTER)
+                ft.Row([button1], alignment=ft.MainAxisAlignment.CENTER),
+                text1
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER

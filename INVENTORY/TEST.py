@@ -309,7 +309,7 @@ class Parent:
         text21=ft.TextField(hint_text="PLEASE SELECT ")
         options_menu=ft.PopupMenuButton(
             items= [
-                     ft.PopupMenuItem(text="text",on_click=lambda e :(setattr(text21,"value","text"),self.page.update())),
+                     ft.PopupMenuItem(text="text",),
                      ft.PopupMenuItem(text="numbers",on_click=lambda e :(setattr(text21,"value","numbers"),self.page.update())),
                      ft.PopupMenuItem(text="yes/no",on_click=lambda e :(setattr(text21,"value","yes/no"),self.page.update())),
                      ft.PopupMenuItem(text="date",on_click=lambda e :(setattr(text21,"value","yes/no"),self.page.update())),
