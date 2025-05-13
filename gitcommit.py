@@ -21,7 +21,7 @@ def main(page: ft.Page):
     
     def commit_changes(e):
         if textfield.value:  # Only commit if there's a message
-            
+            text1.value="SAVING PLEASE WAIT"
             git_caller(textfield.value)
             page.snack_bar = ft.SnackBar(ft.Text("Changes committed successfully!"))
             page.snack_bar.open = True
