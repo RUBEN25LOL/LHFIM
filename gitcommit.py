@@ -21,7 +21,7 @@ def main(page: ft.Page):
     
     def commit_changes(e):
         if textfield.value:  # Only commit if there's a message
-            text1.value="SAVING PLEASE WAIT"
+            
             git_caller(textfield.value)
             page.snack_bar = ft.SnackBar(ft.Text("Changes committed successfully!"))
             page.snack_bar.open = True
@@ -38,7 +38,7 @@ def main(page: ft.Page):
     button1= ft.IconButton(
         icon=ft.icons.CHECK_CIRCLE,
         icon_size=40,
-        on_click=lambda e :(setattr(text1,"value","SAVING PLEASE WAIT"),commit_changes(None)),
+        on_click=lambda e :(setattr(text1,"value","SAVING PLEASE WAIT"),page.update(),commit_changes(None)),
         tooltip="Commit changes"
     )
     
