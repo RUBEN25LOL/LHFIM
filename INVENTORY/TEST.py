@@ -340,6 +340,17 @@ class Parent:
         text5=ft.Text("    CANCEL ",size=25, weight=ft.FontWeight.BOLD)
         icon1=ft.Icon(ft.Icons.CANCEL)
        
+
+        text6=ft.Text(f''' e
+                      e
+                      e
+                      e
+                      e
+                      e
+                        ''',size=15,weight=ft.FontWeight.BOLD)
+        temp6=ft.Container(content=text6,alignment=ft.alignment.center,expand=True)
+
+
         cancel_button=ft.Container(
             content=ft.Column(controls=[text5,icon1],
             alignment=ft.MainAxisAlignment.CENTER,  
@@ -368,11 +379,12 @@ class Parent:
             ft.Container(content=text3),
             ft.Container(content=switch),
              ft.Container(content=text31)],
-            alignment=ft.alignment.center)
+            alignment=ft.CrossAxisAlignment.CENTER
+            )
         
-       
         
-        self.page.add(ft.Column(controls=[temp,temp1,temp2,temp3,buttonrow]))
+        
+        self.page.add(ft.Column(controls=[temp,temp1,temp2,temp3,buttonrow,temp6],alignment=ft.MainAxisAlignment.CENTER,horizontal_alignment=ft.MainAxisAlignment.CENTER))
         self.page.add()
         self.page.update()
 

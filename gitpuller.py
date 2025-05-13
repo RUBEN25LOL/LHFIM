@@ -2,7 +2,7 @@ import flet as ft
 import os
 
 def main(page: ft.Page):
-    page.title = "Commiter"
+    page.title = "puller"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
     # UI Components
