@@ -6,6 +6,7 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
     # UI Components
+    text1=ft.Text("UNSAVED PLEASE SAVE",weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER)
     text = ft.Text(
         "CLICK TO SAVE ALL THE CHANGES MADE IN THE FILE TO ALL THE SYSTEM:",
         size=15,
@@ -20,6 +21,7 @@ def main(page: ft.Page):
     
     def commit_changes(e):
         if textfield.value:  # Only commit if there's a message
+            text1.value="SAVING PLEASE WAIT"
             git_caller(textfield.value)
             page.snack_bar = ft.SnackBar(ft.Text("Changes committed successfully!"))
             page.snack_bar.open = True
@@ -29,13 +31,13 @@ def main(page: ft.Page):
         textfield.value=""
         page.update()
     
-    text1=ft.Text("",weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER)
+    
 
 
     button1= ft.IconButton(
         icon=ft.icons.CHECK_CIRCLE,
         icon_size=40,
-        on_click=lambda e :(setattr(text1,"value","text"),commit_changes(None)),
+        on_click=lambda e :(setattr(text1,"value","SAVED SUCCESSFULLY"),commit_changes(None)),
         tooltip="Commit changes"
     )
     
