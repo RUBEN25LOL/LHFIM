@@ -294,7 +294,7 @@ class Parent:
         page.update()
     
     def add_category_scene(self,e):
-
+        categ_list=["a","v","s","e","s","i","t","s","s","i","t"]
         self.page.controls.clear()
         main_text = ft.Text("ADD A NEW CATEGORY", size=25, weight=ft.FontWeight.BOLD)
         exit_button = ft.IconButton(ft.Icons.EXIT_TO_APP_ROUNDED, on_click=self.show_inventory_scene)
@@ -339,17 +339,28 @@ class Parent:
        
         text5=ft.Text("    CANCEL ",size=25, weight=ft.FontWeight.BOLD)
         icon1=ft.Icon(ft.Icons.CANCEL)
-       
+     # Create individual Text widgets for each category
+        category_widgets = [
+            ft.Text(category, size=20, weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER)
+            for category in categ_list
+            ]
 
-        text6=ft.Text(f''' e
-                      e
-                      e
-                      e
-                      e
-                      e
-                        ''',size=15,weight=ft.FontWeight.BOLD)
-        temp6=ft.Container(content=text6,alignment=ft.alignment.center,expand=True)
+        scrollable_content = ft.ListView(
+        controls=[
+        ft.Text("PREVIOUS CATEGORIES ADDED", size=20, weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER),
+            *category_widgets  # Unpack all category widgets
+              ],
+            spacing=10,  # Space between items
+            height=200,  # Fixed height
+            auto_scroll=False  # Set to True if you want auto-scroll to bottom
+            )
 
+        temp6 = ft.Container(
+            content=scrollable_content,
+            alignment=ft.alignment.top_center,
+            border=ft.border.all(1),
+            border_radius=10
+            )
 
         cancel_button=ft.Container(
             content=ft.Column(controls=[text5,icon1],
