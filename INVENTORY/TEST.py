@@ -347,7 +347,9 @@ class Parent:
 
         scrollable_content = ft.ListView(
         controls=[
-        ft.Text("PREVIOUS CATEGORIES ADDED", size=20, weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER),
+        ft.Text("PREVIOUS CATEGORIES ADDED", size=20, weight=ft.FontWeight.BOLD,text_align=
+        
+        ft.TextAlign.CENTER),
             *category_widgets  # Unpack all category widgets
               ],
             spacing=10,  # Space between items
