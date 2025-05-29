@@ -34,8 +34,8 @@ def main(page: ft.Page):
 def git_caller(prompt):
     # Change to your project directory if needed
     # os.chdir("/path/to/your/project")
-    os.chdir("E:\github_lhfim")
     
+    os.system("git stash")
     os.system("git pull origin main")
     
 
