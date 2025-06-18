@@ -2,72 +2,60 @@ import flet as ft
 import sqlite3
 
 
-def table_creater(name,listofcolumns):
-        cursor.execute(f'''
-        CREATE TABLE IF NOT EXISTS {name} ''')
-        connection.commit()
-        if listofcolumns!=None:
-            for i in range(len(listofcolumns)):
-                cursor.execute(f''' 
-                ALTER TABLE {name} ADD COLUMN {listofcolumns[i]} TEXT''')
+import flet as ft
+import sqlite3
 
-
-def table_reader(name, listofcolumns):
-   
-        try:
-            connection.row_factory = sqlite3.Row
-            cursor = connection.cursor()
-            
-            if len(listofcolumns) == 0:
-                cursor.execute(f"SELECT * FROM {name}")
-            else:
-                # Escape column names to prevent SQL injection and join them
-                columns = ", ".join(f"[{col}]" for col in listofcolumns)
-                cursor.execute(f"SELECT {columns} FROM {name}")
-            
-            rows = cursor.fetchall()
-            return rows
-        except sqlite3.Error as e:
-            print(f"Error reading table {name}: {e}")
-            return []
-
-
-def table_writer(name, dictionary_of_values):
-        try:
-            # Extract columns and rows
-            columns = list(dictionary_of_values.keys())
-            num_rows = len(dictionary_of_values[columns[0]])
-            
-            # Ensure all columns have the same number of rows
-            for col in columns:
-                if len(dictionary_of_values[col]) != num_rows:
-                    raise ValueError(f"Column '{col}' has inconsistent row count.")
-
-            # Insert row by row
-            for i in range(num_rows):
-                values = [dictionary_of_values[col][i] for col in columns]
-                placeholders = ", ".join(["?"] * len(columns))
-                column_names = ", ".join(f"[{col}]" for col in columns)  # Escape names with brackets
-                cursor.execute(
-                    f"INSERT INTO {name} ({column_names}) VALUES ({placeholders})",
-                    values
-                )
-            
-            connection.commit()
-            print("Rows inserted successfully.")
-            
-        except sqlite3.Error as e:
-            print(f"Error writing to table {name}: {e}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-
-
-
+class Database:
+    def __init__(self, db_path="mydb.db"):
+        self.db_path = db_path
+        
+    def get_connection(self):
+        """Create a new connection for each operation (thread-safe)"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
 
 class Parent:
     def __init__(self, page: ft.Page):
         self.page = page
+        self.db = Database()
         
+    def table_creater(self, name, listofcolumns=None):
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'CREATE TABLE IF NOT EXISTS {name} (id INTEGER PRIMARY KEY)')
+            if listofcolumns:
+                for col in listofcolumns:
+                    try:
+                        cursor.execute(f'ALTER TABLE {name} ADD COLUMN {col} TEXT')
+                    except sqlite3.Error:
+                        pass  # Column already exists
+            conn.commit()
+
+    def table_reader(self, name, listofcolumns=None):
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            if not listofcolumns:
+                cursor.execute(f'SELECT * FROM {name}')
+            else:
+                cols = ", ".join(listofcolumns)
+                cursor.execute(f'SELECT {cols} FROM {name}')
+            return cursor.fetchall()
+
+    def table_writer(self, name, data_dict):
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            columns = list(data_dict.keys())
+            values = list(zip(*data_dict.values()))
+            
+            placeholders = ", ".join(["?"] * len(columns))
+            cols = ", ".join(columns)
+            
+            cursor.executemany(
+                f'INSERT INTO {name} ({cols}) VALUES ({placeholders})',
+                values
+            )
+            conn.commit()
         
     def main_scene(self):
         self.page.controls.clear()  # Clear existing controls
@@ -297,9 +285,9 @@ class Parent:
     
     def add_category_scene(self,e):
         categ_keys=["name","datatype","null_status"]
-        table_creater("category",categ_keys)
+        self.table_creater("category",categ_keys)
         
-        categ_name_list=table_reader("category",["name"])
+        categ_name_list=self.table_reader("category",["name"])
         self.page.controls.clear()
         main_text = ft.Text("ADD A NEW CATEGORY", size=25, weight=ft.FontWeight.BOLD)
         exit_button = ft.IconButton(ft.Icons.EXIT_TO_APP_ROUNDED, on_click=self.show_inventory_scene)
@@ -412,25 +400,15 @@ class Parent:
 
 
 
-    
-
 
 
     def run_app(self):
         def main(page: ft.Page):
             self.page = page
-            theme = ft.Theme(
-            primary_color=ft.colors.BLUE
-            
-            )
-            
-            self.page.theme_mode=ft.ThemeMode.DARK
-            self.main_scene()  # Start with the main scene
+            self.page.theme_mode = ft.ThemeMode.DARK
+            self.main_scene()
         ft.app(target=main)
 
-# Create an instance of Parent and run the app
-connection=sqlite3.connect("mydb.db")
-cursor=connection.cursor()
-
-parent = Parent(None)  # Temporarily pass None for page; it will be set in run_app
-parent.run_app()
+if __name__ == "__main__":
+    parent = Parent(None)
+    parent.run_app()
