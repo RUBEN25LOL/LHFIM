@@ -3,63 +3,65 @@ import sqlite3
 
 
 def table_creater(name,listofcolumns):
-    cursor.execute(f'''
-    CREATE TABLE IF NOT EXISTS {name} (
-        name TEXT NOT NULL)''')
-    connection.commit()
-    for i in range(len(listofcolumns)):
-        cursor.execute(f''' 
-        ALTER TABLE {name} ADD COLUMN {listofcolumns[i]} TEXT''')
+        cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {name} ''')
+        connection.commit()
+        if listofcolumns!=None:
+            for i in range(len(listofcolumns)):
+                cursor.execute(f''' 
+                ALTER TABLE {name} ADD COLUMN {listofcolumns[i]} TEXT''')
 
 
 def table_reader(name, listofcolumns):
    
-    try:
-        connection.row_factory = sqlite3.Row
-        cursor = connection.cursor()
-        
-        if len(listofcolumns) == 0:
-            cursor.execute(f"SELECT * FROM {name}")
-        else:
-            # Escape column names to prevent SQL injection and join them
-            columns = ", ".join(f"[{col}]" for col in listofcolumns)
-            cursor.execute(f"SELECT {columns} FROM {name}")
-        
-        rows = cursor.fetchall()
-        return rows
-    except sqlite3.Error as e:
-        print(f"Error reading table {name}: {e}")
-        return []
+        try:
+            connection.row_factory = sqlite3.Row
+            cursor = connection.cursor()
+            
+            if len(listofcolumns) == 0:
+                cursor.execute(f"SELECT * FROM {name}")
+            else:
+                # Escape column names to prevent SQL injection and join them
+                columns = ", ".join(f"[{col}]" for col in listofcolumns)
+                cursor.execute(f"SELECT {columns} FROM {name}")
+            
+            rows = cursor.fetchall()
+            return rows
+        except sqlite3.Error as e:
+            print(f"Error reading table {name}: {e}")
+            return []
 
 
 def table_writer(name, dictionary_of_values):
-    try:
-        # Extract columns and rows
-        columns = list(dictionary_of_values.keys())
-        num_rows = len(dictionary_of_values[columns[0]])
-        
-        # Ensure all columns have the same number of rows
-        for col in columns:
-            if len(dictionary_of_values[col]) != num_rows:
-                raise ValueError(f"Column '{col}' has inconsistent row count.")
+        try:
+            # Extract columns and rows
+            columns = list(dictionary_of_values.keys())
+            num_rows = len(dictionary_of_values[columns[0]])
+            
+            # Ensure all columns have the same number of rows
+            for col in columns:
+                if len(dictionary_of_values[col]) != num_rows:
+                    raise ValueError(f"Column '{col}' has inconsistent row count.")
 
-        # Insert row by row
-        for i in range(num_rows):
-            values = [dictionary_of_values[col][i] for col in columns]
-            placeholders = ", ".join(["?"] * len(columns))
-            column_names = ", ".join(f"[{col}]" for col in columns)  # Escape names with brackets
-            cursor.execute(
-                f"INSERT INTO {name} ({column_names}) VALUES ({placeholders})",
-                values
-            )
-        
-        connection.commit()
-        print("Rows inserted successfully.")
-        
-    except sqlite3.Error as e:
-        print(f"Error writing to table {name}: {e}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
+            # Insert row by row
+            for i in range(num_rows):
+                values = [dictionary_of_values[col][i] for col in columns]
+                placeholders = ", ".join(["?"] * len(columns))
+                column_names = ", ".join(f"[{col}]" for col in columns)  # Escape names with brackets
+                cursor.execute(
+                    f"INSERT INTO {name} ({column_names}) VALUES ({placeholders})",
+                    values
+                )
+            
+            connection.commit()
+            print("Rows inserted successfully.")
+            
+        except sqlite3.Error as e:
+            print(f"Error writing to table {name}: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+
+
 
 
 class Parent:
@@ -294,7 +296,10 @@ class Parent:
         page.update()
     
     def add_category_scene(self,e):
-        categ_list=["a","v","s","e","s","i","t","s","s","i","t"]
+        categ_keys=["name","datatype","null_status"]
+        table_creater("category",categ_keys)
+        
+        categ_name_list=table_reader("category",["name"])
         self.page.controls.clear()
         main_text = ft.Text("ADD A NEW CATEGORY", size=25, weight=ft.FontWeight.BOLD)
         exit_button = ft.IconButton(ft.Icons.EXIT_TO_APP_ROUNDED, on_click=self.show_inventory_scene)
@@ -342,7 +347,7 @@ class Parent:
      # Create individual Text widgets for each category
         category_widgets = [
             ft.Text(category, size=20, weight=ft.FontWeight.BOLD,text_align=ft.TextAlign.CENTER)
-            for category in categ_list
+            for category in categ_name_list
             ]
 
         scrollable_content = ft.ListView(
@@ -407,7 +412,7 @@ class Parent:
 
 
 
-
+    
 
 
 
