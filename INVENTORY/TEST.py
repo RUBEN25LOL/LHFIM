@@ -285,9 +285,11 @@ class Parent:
     
     def add_category_scene(self,e):
         categ_keys=["name","datatype","null_status"]
-        self.table_creater("category",categ_keys)
         
-        categ_name_list=self.table_reader("category",["name"])
+        self.table_creater("category",categ_keys)
+        categ_temp=self.table_reader("category",["name"])
+        categ_name_list=[row["name"] for row in categ_temp]
+        print(categ_name_list)
         self.page.controls.clear()
         main_text = ft.Text("ADD A NEW CATEGORY", size=25, weight=ft.FontWeight.BOLD)
         exit_button = ft.IconButton(ft.Icons.EXIT_TO_APP_ROUNDED, on_click=self.show_inventory_scene)
@@ -297,7 +299,7 @@ class Parent:
             ft.Container(content=main_text, alignment=ft.alignment.center, expand=True)])
         
         text1 = ft.Text("ENTER THE NAME :", size=25, weight=ft.FontWeight.BOLD)
-        textfield1=ft.TextField(hint_text="ENTER THE NAME : ")
+        text11=ft.TextField(hint_text="ENTER THE NAME : ")
         text2=ft.Text("SELECT THE TYPE OF CATEGORY : ",size=25, weight=ft.FontWeight.BOLD)
         text21=ft.TextField(hint_text="PLEASE SELECT ")
         options_menu=ft.PopupMenuButton(
@@ -305,7 +307,7 @@ class Parent:
                      ft.PopupMenuItem(text="text",),
                      ft.PopupMenuItem(text="numbers",on_click=lambda e :(setattr(text21,"value","numbers"),self.page.update())),
                      ft.PopupMenuItem(text="yes/no",on_click=lambda e :(setattr(text21,"value","yes/no"),self.page.update())),
-                     ft.PopupMenuItem(text="date",on_click=lambda e :(setattr(text21,"value","yes/no"),self.page.update())),
+                     ft.PopupMenuItem(text="date",on_click=lambda e :(setattr(text21,"value","date"),self.page.update())),
                      ft.PopupMenuItem(text="percentage",on_click=lambda e :(setattr(text21,"value","percentage"),self.page.update())),
                      ft.PopupMenuItem(text="price",on_click=lambda e :(setattr(text21,"value","price"),self.page.update()))],
                       )
@@ -324,7 +326,7 @@ class Parent:
             content=ft.Column(controls=[text4,icon],
             alignment=ft.MainAxisAlignment.CENTER,  
             horizontal_alignment=ft.CrossAxisAlignment.CENTER ),
-            on_click=lambda e:(self.add_category_scene(None),),
+            on_click=lambda e :(button_function_save(None)),
             ink=True,
             alignment=ft.alignment.center,
             ink_color=ft.colors.AMBER_100)
@@ -368,11 +370,22 @@ class Parent:
         
         buttonrow=ft.Row(controls=[save_button,cancel_button],alignment=ft.MainAxisAlignment.CENTER)
         
-        
+        def button_function_save(e):
+            if not text11.value or not text21.value:
+                return  # Don't save if required fields are empty
+                
+            # Correct dictionary construction
+            dict_temp = {
+                "name": [text11.value],
+                "datatype": [text21.value],
+                "null_status": [switch.value]
+            }
+            self.table_writer("category", dict_temp)
+            self.add_category_scene(None)  # Refresh the scene
         
         temp1=ft.Row(controls=[
             ft.Container(content=text1),
-            ft.Container(content=textfield1)],
+            ft.Container(content=text11)],
             alignment=ft.alignment.center)
 
         temp2=ft.Row(controls=[
@@ -387,6 +400,9 @@ class Parent:
              ft.Container(content=text31)],
             alignment=ft.CrossAxisAlignment.CENTER
             )
+        
+        
+        
         
         
         
