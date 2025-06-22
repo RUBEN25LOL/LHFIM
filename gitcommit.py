@@ -43,7 +43,7 @@ def main(page: ft.Page):
         page.update()
     
     button = ft.IconButton(
-        icon=ft.icons.CHECK_CIRCLE,
+        icon=ft.Icons.CHECK_CIRCLE,
         icon_size=40,
         on_click=commit_changes,
         tooltip="Commit changes"

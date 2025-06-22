@@ -1,3 +1,4 @@
+from typing import Any
 import flet as ft
 import sqlite3
 
@@ -56,7 +57,37 @@ class Parent:
                 values
             )
             conn.commit()
-        
+    
+    
+    
+    def item_deleter(self, table_name: str, condition_column: str, condition_value: Any) :
+        """
+        Deletes items where condition_column = condition_value
+        Returns number of rows deleted
+        Example: item_deleter("users", "id", 5)
+        """
+        with self.db.get_connection() as conn:
+            try:
+                cursor = conn.cursor()
+                query = f'DELETE FROM {table_name} WHERE {condition_column} = ?'
+                cursor.execute(query, (condition_value,))
+                conn.commit()
+            except Exception as e:
+                raise ValueError(f"Modification failed: {str(e)}")
+          
+    
+    def item_modifier(self, table_name, columns, values, condition_col, condition_val):
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                set_clause = ", ".join([f"{col} = ?" for col in columns])
+                query = f"UPDATE {table_name} SET {set_clause} WHERE {condition_col} = ?"
+                params = [*values, condition_val]
+                cursor.execute(query, params)
+                conn.commit()
+        except Exception as e:
+            raise ValueError(f"Modification failed: {str(e)}")
+            
     def main_scene(self):
         self.page.controls.clear()  # Clear existing controls
         self.inventory_button = ft.ElevatedButton(
@@ -150,7 +181,7 @@ class Parent:
         padding=15,
         on_click=lambda e: print(" new item button clicked"),
         ink=True,
-        ink_color=ft.colors.AMBER_100)
+        ink_color=ft.Colors.AMBER_100)
 
         text4=ft.Text("VIEW INVENTORY ",text_align=ft.TextAlign.CENTER)
         add_group_row3= ft.Column(
@@ -167,7 +198,7 @@ class Parent:
         padding=15,
         on_click=lambda e: print(" INVENTORY button clicked"),
         ink=True,
-        ink_color=ft.colors.AMBER_100)
+        ink_color=ft.Colors.AMBER_100)
 
 
 
@@ -186,7 +217,7 @@ class Parent:
         content=ft.Column(controls=[add_group_row4], alignment=ft.MainAxisAlignment.CENTER),
         alignment=ft.alignment.center,
         padding=15,
-        on_click=lambda e: print(" edit category button clicked"),
+        on_click=lambda e: (self.manage_category_scene(None)),
         ink=True,
         ink_color=ft.Colors.AMBER_100)
 
@@ -207,7 +238,7 @@ class Parent:
         padding=15,
         on_click=lambda e: print(" edit item button clicked"),
         ink=True,
-        ink_color=ft.colors.AMBER_100)
+        ink_color=ft.Colors.AMBER_100)
         
 
 
@@ -283,6 +314,34 @@ class Parent:
         page.theme_mode = ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
         page.update()
     
+    def manage_category_scene(self,e):
+        self.page.controls.clear()
+        main_text = ft.Text("EDIT CATEGORY", size=25, weight=ft.FontWeight.BOLD)
+        exit_button = ft.IconButton(ft.Icons.EXIT_TO_APP_ROUNDED, on_click=self.show_inventory_scene)
+        
+        temp = ft.Row(
+         controls=[
+            ft.Container(content=exit_button, alignment=ft.alignment.top_left),
+            ft.Container(content=main_text, alignment=ft.alignment.center, expand=True)])
+        categ_temp=self.table_reader("category")
+        categ_list=[dict(x) for x in categ_temp] 
+        
+        item_tile=[ft.Container(content=ft.Row(controls=[ft.ListTile(
+                title=ft.Text(cat["name"]),
+                expand=True,
+                subtitle=ft.Text(f"Type: {cat['datatype']} | Nullable: {'Yes' if cat['null_status'] else 'No'}")
+            ),ft.IconButton(
+                icon=ft.Icons.EDIT,
+                data=cat["id"],  # or index from loop
+                on_click=lambda e: print(f"Editing: {e.control.data}") )]))for cat in categ_list
+        ]or [ft.Text("No categories yet")]
+        
+        listview=ft.ListView(expand=True,controls=item_tile)
+        self.page.add(temp,listview)
+        self.page.update()
+        
+        
+        
     def add_category_scene(self,e):
         categ_keys=["name","datatype","null_status"]
         
@@ -304,7 +363,7 @@ class Parent:
         text21=ft.TextField(hint_text="PLEASE SELECT ")
         options_menu=ft.PopupMenuButton(
             items= [
-                     ft.PopupMenuItem(text="text",),
+                     ft.PopupMenuItem(text="text",on_click=lambda e :(setattr(text21,"value","text"),self.page.update())),
                      ft.PopupMenuItem(text="numbers",on_click=lambda e :(setattr(text21,"value","numbers"),self.page.update())),
                      ft.PopupMenuItem(text="yes/no",on_click=lambda e :(setattr(text21,"value","yes/no"),self.page.update())),
                      ft.PopupMenuItem(text="date",on_click=lambda e :(setattr(text21,"value","date"),self.page.update())),
@@ -329,8 +388,18 @@ class Parent:
             on_click=lambda e :(button_function_save(None)),
             ink=True,
             alignment=ft.alignment.center,
-            ink_color=ft.colors.AMBER_100)
-       
+            ink_color=ft.Colors.AMBER_100)
+        text6=ft.Text(" DELETE ",size=25, weight=ft.FontWeight.BOLD)
+        icon6=ft.Icon(name="delete_forever", color="red", size=30)
+       #delete category button
+        delete_button=ft.Container(
+                content=ft.Column(controls=[text6,icon6],
+                alignment=ft.MainAxisAlignment.CENTER,  
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER ),
+                on_click=lambda e :(self.manage_category_scene(None)),
+                ink=True,
+                alignment=ft.alignment.center,
+                ink_color=ft.Colors.AMBER_100)
        
         text5=ft.Text("    CANCEL ",size=25, weight=ft.FontWeight.BOLD)
         icon1=ft.Icon(ft.Icons.CANCEL)
@@ -366,9 +435,9 @@ class Parent:
             on_click=lambda e:(self.add_category_scene(None),),
             ink=True,
             alignment=ft.alignment.center,
-            ink_color=ft.colors.AMBER_100)
+            ink_color=ft.Colors.AMBER_100)
         
-        buttonrow=ft.Row(controls=[save_button,cancel_button],alignment=ft.MainAxisAlignment.CENTER)
+        buttonrow=ft.Row(controls=[save_button,cancel_button,delete_button],alignment=ft.MainAxisAlignment.CENTER)
         
         def button_function_save(e):
             if not text11.value or not text21.value:

@@ -2,7 +2,7 @@ import flet as ft
 import sqlite3
 from typing import List, Dict, Any, Optional
 import time
-from flet import colors, icons
+from flet import Colors, Icons
 
 # ========== CONSTANTS ==========
 CATEGORY_TABLE = "category"
@@ -64,7 +64,7 @@ class UIUtils:
     def show_snackbar(
         page: ft.Page,
         message: str,
-        color: str = colors.GREEN_400,
+        color: str = Colors.GREEN_400,
         duration: int = 3000
     ) -> None:
         page.snack_bar = ft.SnackBar(
@@ -98,12 +98,12 @@ class InventoryApp:
             ft.Column(
                 [
                     ft.Text("Main Menu", size=30, weight=ft.FontWeight.BOLD),
-                    ft.ElevatedButton("Inventory", icon=icons.INVENTORY_2, on_click=self.show_inventory_scene),
-                    ft.ElevatedButton("Buyers", icon=icons.PEOPLE_OUTLINE, on_click=self.show_buyers_scene),
-                    ft.ElevatedButton("Customers", icon=icons.SHOPPING_CART_OUTLINED, on_click=self.show_customers_scene),
-                    ft.ElevatedButton("Reports", icon=icons.ANALYTICS_OUTLINED, on_click=self.show_reports_scene),
-                    ft.ElevatedButton("Settings", icon=icons.SETTINGS_OUTLINED, on_click=self.show_settings_scene),
-                    ft.ElevatedButton("Toggle Theme", icon=icons.DARK_MODE_OUTLINED, on_click=self.toggle_theme),
+                    ft.ElevatedButton("Inventory", icon=Icons.INVENTORY_2, on_click=self.show_inventory_scene),
+                    ft.ElevatedButton("Buyers", icon=Icons.PEOPLE_OUTLINE, on_click=self.show_buyers_scene),
+                    ft.ElevatedButton("Customers", icon=Icons.SHOPPING_CART_OUTLINED, on_click=self.show_customers_scene),
+                    ft.ElevatedButton("Reports", icon=Icons.ANALYTICS_OUTLINED, on_click=self.show_reports_scene),
+                    ft.ElevatedButton("Settings", icon=Icons.SETTINGS_OUTLINED, on_click=self.show_settings_scene),
+                    ft.ElevatedButton("Toggle Theme", icon=Icons.DARK_MODE_OUTLINED, on_click=self.toggle_theme),
                 ],
                 spacing=15,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
@@ -117,7 +117,7 @@ class InventoryApp:
         header = ft.Row(
             controls=[
                 ft.IconButton(
-                    icon=icons.ARROW_BACK_IOS_NEW_OUTLINED,
+                    icon=Icons.ARROW_BACK_IOS_NEW_OUTLINED,
                     on_click=self.main_scene
                 ),
                 ft.Text("Inventory Management", size=25, expand=True),
@@ -127,10 +127,10 @@ class InventoryApp:
 
         actions = ft.ResponsiveRow(
             controls=[
-                self._create_action_card("Add New Category", icons.ADD_CIRCLE_OUTLINED, self.add_category_scene),
-                self._create_action_card("Add New Item", icons.ADD_BOX_OUTLINED, lambda e: print("Add item")),
-                self._create_action_card("View Inventory", icons.LIST_OUTLINED, lambda e: print("View inventory")),
-                self._create_action_card("Edit Categories", icons.EDIT_OUTLINED, lambda e: print("Edit categories")),
+                self._create_action_card("Add New Category", Icons.ADD_CIRCLE_OUTLINED, self.add_category_scene),
+                self._create_action_card("Add New Item", Icons.ADD_BOX_OUTLINED, lambda e: print("Add item")),
+                self._create_action_card("View Inventory", Icons.LIST_OUTLINED, lambda e: print("View inventory")),
+                self._create_action_card("Edit Categories", Icons.EDIT_OUTLINED, lambda e: print("Edit categories")),
             ],
             spacing=20
         )
@@ -151,7 +151,7 @@ class InventoryApp:
             on_click=on_click,
             ink=True,
             border_radius=10,
-            bgcolor=colors.SURFACE_VARIANT,
+            bgcolor=Colors.ON_SURFACE_VARIANT,
             width=250,
             height=120,
             alignment=ft.alignment.center
@@ -172,7 +172,7 @@ class InventoryApp:
         )
         
         null_switch = ft.Switch(label="Allow empty values?", value=False)
-        save_button = ft.ElevatedButton("Save", icon=icons.SAVE_OUTLINED, on_click=lambda e: self._save_category(
+        save_button = ft.ElevatedButton("Save", icon=Icons.SAVE_OUTLINED, on_click=lambda e: self._save_category(
             name_field, type_field, null_switch, category_list
         ))
         
@@ -186,7 +186,7 @@ class InventoryApp:
                     ft.Row(
                         [
                             ft.IconButton(
-                                icon=icons.ARROW_BACK_IOS_NEW_OUTLINED,
+                                icon=Icons.ARROW_BACK_IOS_NEW_OUTLINED,
                                 on_click=self.show_inventory_scene
                             ),
                             ft.Text("Add Category", size=25, expand=True),
@@ -200,7 +200,7 @@ class InventoryApp:
                     ft.Text("Existing Categories"),
                     ft.Container(
                         content=category_list,
-                        border=ft.border.all(1, colors.OUTLINE),
+                        border=ft.border.all(1, Colors.OUTLINE),
                         border_radius=10,
                         padding=10,
                         height=200
@@ -228,10 +228,10 @@ class InventoryApp:
     def _save_category(self, name_field: ft.TextField, type_field: ft.TextField, 
                       null_switch: ft.Switch, list_view: ft.ListView) -> None:
         if not name_field.value:
-            self.ui.show_snackbar(self.page, "Name is required!", colors.RED_400)
+            self.ui.show_snackbar(self.page, "Name is required!", Colors.RED_400)
             return
         if not type_field.value:
-            self.ui.show_snackbar(self.page, "Select a data type", colors.RED_400)
+            self.ui.show_snackbar(self.page, "Select a data type", Colors.RED_400)
             return
 
         if self.db.insert_category(name_field.value, type_field.value, null_switch.value):
@@ -241,7 +241,7 @@ class InventoryApp:
             self._load_categories(list_view)
             self.ui.show_snackbar(self.page, "Category saved!")
         else:
-            self.ui.show_snackbar(self.page, "Name already exists!", colors.RED_400)
+            self.ui.show_snackbar(self.page, "Name already exists!", Colors.RED_400)
         self.page.update()
 
     # Placeholder scenes
@@ -258,7 +258,7 @@ class InventoryApp:
                     ft.Row(
                         [
                             ft.IconButton(
-                                icon=icons.ARROW_BACK_IOS_NEW_OUTLINED,
+                                icon=Icons.ARROW_BACK_IOS_NEW_OUTLINED,
                                 on_click=self.main_scene
                             ),
                             ft.Text(title, size=25, expand=True),
