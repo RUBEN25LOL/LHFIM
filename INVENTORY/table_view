@@ -2,6 +2,8 @@ import flet as ft
 from typing import List, Dict
 import random
 from faker import Faker
+import tkinter as tk
+from tkinter import ttk
 
 class TableViewer:
     def __init__(self, page: ft.Page):
@@ -9,14 +11,15 @@ class TableViewer:
         self.page.window_maximized = True
         self.fake = Faker()
         
-        # Generate 80 sample records with 20 columns
+        # Generate 80 sample records with 16 columns
         self.original_data = self.generate_sample_data(80)
         self.available_columns = [
-            "id", "name", "email", "company", "job_title", "salary", "join_date", 
-            "active", "rating", "phone", "address", "city", "country", "department",
-            "manager", "projects", "skills", "education", "certifications", "languages"
+            "id", "name", "email", "company", "job", "salary", "join_date", 
+            "active", "rating", "department", "phone", "address", "city", 
+            "country", "manager", "projects"
         ]
         self.selected_columns = self.available_columns.copy()
+        
         self.setup_ui()
     
     def generate_sample_data(self, count):
@@ -27,57 +30,39 @@ class TableViewer:
                 "name": self.fake.name(),
                 "email": self.fake.email(),
                 "company": self.fake.company(),
-                "job_title": self.fake.job(),
+                "job": self.fake.job(),
                 "salary": f"${random.randint(30000, 150000):,}",
                 "join_date": self.fake.date_this_decade(),
                 "active": random.choice([True, False]),
                 "rating": f"{random.uniform(1, 5):.1f} ★",
+                "department": random.choice(["HR", "IT", "Finance", "Marketing"]),
                 "phone": self.fake.phone_number(),
                 "address": self.fake.street_address(),
                 "city": self.fake.city(),
                 "country": self.fake.country(),
-                "department": random.choice(["HR", "IT", "Finance", "Marketing", "Operations"]),
                 "manager": self.fake.name(),
-                "projects": random.randint(1, 10),
-                "skills": ", ".join(self.fake.words(random.randint(3, 8))),
-                "education": random.choice(["Bachelor", "Master", "PhD"]),
-                "certifications": random.randint(0, 5),
-                "languages": random.choice(["English", "Spanish", "French", "German"])
+                "projects": random.randint(1, 10)
             })
         return data
 
     def setup_ui(self):
-        # Column selection checkboxes
-        self.column_controls = ft.Row(
-            wrap=True,
-            controls=[
-                ft.Checkbox(
-                    label=col,
-                    value=True,
-                    on_change=lambda e, col=col: self.toggle_column(col, e.control.value)
-                ) for col in self.available_columns
-            ],
-            scroll=ft.ScrollMode.AUTO
+        # Column selection button
+        self.column_select_button = ft.ElevatedButton(
+            "Select Columns",
+            icon=ft.Icons.LIST,
+            on_click=self.open_column_selector
         )
         
-        # DataTable configuration
+        # DataTable with horizontal scrolling
         self.data_table = ft.DataTable(
-            columns=[
-                ft.DataColumn(
-                    ft.Text(
-                        col[:15] + "..." if len(col) > 15 else col,
-                        weight=ft.FontWeight.BOLD,
-                        tooltip=col
-                    )
-                ) for col in self.selected_columns
-            ],
+            columns=[ft.DataColumn(ft.Text(col, weight=ft.FontWeight.BOLD)) for col in self.selected_columns],
             rows=self.generate_table_rows(),
-            heading_row_color=ft.colors.BLUE_GREY_100,
+            heading_row_color=ft.Colors.BLACK12,
             heading_row_height=40,
             data_row_min_height=40,
         )
         
-        # Scrollable containers
+        # Horizontal scroll container
         horizontal_scroll = ft.Container(
             content=ft.Row(
                 controls=[self.data_table],
@@ -86,63 +71,113 @@ class TableViewer:
             expand=True
         )
         
-        vertical_scroll = ft.ListView(
-            controls=[horizontal_scroll],
-            expand=True
+        # Vertical scroll container
+        table_container = ft.Container(
+            content=ft.Column(
+                controls=[horizontal_scroll],
+                scroll=ft.ScrollMode.ALWAYS
+            ),
+            expand=True,
+            border=ft.border.all(1, ft.Colors.GREY_300),
         )
         
         # Main layout
         self.page.add(
             ft.Column(
                 controls=[
-                    ft.Text("SELECT COLUMNS:", weight=ft.FontWeight.BOLD, size=16),
-                    self.column_controls,
+                    ft.Row([self.column_select_button], alignment=ft.MainAxisAlignment.END),
                     ft.Divider(height=1),
-                    ft.Container(
-                        content=vertical_scroll,
-                        expand=True,
-                        border=ft.border.all(1, ft.colors.GREY_300)
+                    table_container
                 ],
                 expand=True,
                 spacing=10
             )
         )
     
-    def toggle_column(self, column: str, selected: bool):
-        if selected and column not in self.selected_columns:
-            self.selected_columns.append(column)
-        elif not selected and column in self.selected_columns:
-            self.selected_columns.remove(column)
-        self.refresh_table()
+    def open_column_selector(self, e):
+        # Create and configure tkinter window
+        root = tk.Tk()
+        root.title("Select Columns")
+        root.geometry("400x500")
+        
+        # Dark theme configuration
+        root.tk_setPalette(
+            background='#1e1e1e',
+            foreground='white',
+            activeBackground='#3e3e3e',
+            activeForeground='white'
+        )
+        
+        # Main frame
+        main_frame = ttk.Frame(root, padding=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Listbox with scrollbar
+        list_frame = ttk.Frame(main_frame)
+        list_frame.pack(fill=tk.BOTH, expand=True)
+        
+        scrollbar = ttk.Scrollbar(list_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.listbox = tk.Listbox(
+            list_frame,
+            selectmode=tk.MULTIPLE,
+            yscrollcommand=scrollbar.set,
+            font=('Arial', 11),
+            bg='#2e2e2e',
+            fg='white',
+            selectbackground='#4a6ea9',
+            selectforeground='white',
+            relief=tk.FLAT
+        )
+        self.listbox.pack(fill=tk.BOTH, expand=True)
+        scrollbar.config(command=self.listbox.yview)
+        
+        # Populate listbox
+        for i, col in enumerate(self.available_columns):
+            self.listbox.insert(tk.END, col)
+            if col in self.selected_columns:
+                self.listbox.selection_set(i)
+        
+        # Button frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=10)
+        
+        def apply_changes():
+            self.selected_columns = [self.available_columns[i] for i in self.listbox.curselection()]
+            root.destroy()
+            self.refresh_table()
+        
+        ttk.Button(
+            button_frame,
+            text="Apply",
+            command=apply_changes
+        ).pack(side=tk.RIGHT, padx=5)
+        
+        ttk.Button(
+            button_frame,
+            text="Cancel",
+            command=root.destroy
+        ).pack(side=tk.RIGHT)
+        
+        root.mainloop()
     
     def generate_table_rows(self):
         return [
             ft.DataRow(
-                cells=[
-                    ft.DataCell(
-                        ft.Text(
-                            str(item[col])[:20] + "..." if len(str(item[col])) > 20 else str(item[col])
-                        )
-                    ) for col in self.selected_columns
-                ]
-            ) for item in self.original_data
+                cells=[ft.DataCell(ft.Text(str(item[col]))) for col in self.selected_columns]
+            )
+            for item in self.original_data
         ]
     
     def refresh_table(self):
-        self.data_table.columns = [
-            ft.DataColumn(
-                ft.Text(
-                    col[:15] + "..." if len(col) > 15 else col,
-                    weight=ft.FontWeight.BOLD,
-                    tooltip=col
-                )
-            ) for col in self.selected_columns
-        ]
+        self.data_table.columns = [ft.DataColumn(ft.Text(col, weight=ft.FontWeight.BOLD)) for col in self.selected_columns]
         self.data_table.rows = self.generate_table_rows()
         self.page.update()
 
 def main(page: ft.Page):
-    page.title = "Table Viewer with Horizontal/Vertical Scroll"
+    page.theme_mode = ft.ThemeMode.DARK
+    page.title = "Table Viewer"
     TableViewer(page)
 
 ft.app(target=main)
